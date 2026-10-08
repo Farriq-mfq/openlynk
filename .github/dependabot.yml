@@ -1,0 +1,8 @@
+# Dependabot cannot read bun.lock (no Bun ecosystem), so only Actions updates
+# are automated here. Review JS dependency bumps via bun.lock diffs instead.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

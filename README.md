@@ -1,7 +1,9 @@
 # OpenLynk
 
-Self-hosted **link-in-bio + mini website builder** for a single owner. One admin account,
-one public page, your server, your data — no trackers, no lock-in.
+Your own **link-in-bio page** on your own server. Think Linktree, but you own
+it: one public page with all your links, no trackers, no monthly fee, no one
+else's branding. No coding needed to use it — if you can fill in a form, you
+can run your own page.
 
 - **Public page** (`/:username`) — links, profile, themes, avatar & background images, SEO meta, privacy-first view/click analytics
 - **Private dashboard** (`/dashboard`) — links manager with drag-and-drop ordering, appearance editor with theme presets + live preview, analytics
@@ -9,7 +11,36 @@ one public page, your server, your data — no trackers, no lock-in.
 - **Uploads** — avatar and background images served by the API (PNG/JPEG/WebP/GIF, 2 MB cap, SVG rejected)
 - **Docker-first self-hosting** — `docker compose up`, migrations run automatically on boot
 
-## Tech stack
+## Using OpenLynk
+
+1. **Create your account** — open `/setup` once and fill in the form. You become the owner; nobody else can register afterwards.
+2. **Add your links** — sign in at `/login`, open the dashboard, add links and drag them into order. Change colors and your profile picture under Appearance and watch the live preview.
+3. **Share your page** — your public page lives at `/yourname`. Put that one link in your bios. The dashboard shows how many people visited and clicked, without tracking any individual visitor.
+
+## Get it running (Docker, recommended)
+
+You need Docker + Docker Compose on the server. Nothing else to install.
+
+```bash
+cp .env.example .env
+# edit .env — must change POSTGRES_PASSWORD, JWT_SECRET, ANALYTICS_SALT.
+# production: point CORS_ORIGIN, WEB_URL, API_PUBLIC_URL, NUXT_PUBLIC_API_BASE
+#   at your public domains, e.g. https://example.com and https://api.example.com
+docker compose up --build -d
+```
+
+The database starts first, then the app (which prepares itself automatically).
+Then open `/setup` in your browser to create the owner account.
+
+- Your data lives in Docker volumes `pgdata` (database) and `uploads` (pictures), so it survives restarts and updates.
+- Backup: `docker compose exec postgres pg_dump -U $POSTGRES_USER $POSTGRES_DB > backup.sql`
+- Update: `git pull && docker compose up --build -d`
+
+## For developers
+
+Everything below is for people working on the code. As a user you can stop here.
+
+### Tech stack
 
 | Layer | Tech |
 |---|---|
@@ -19,7 +50,7 @@ one public page, your server, your data — no trackers, no lock-in.
 | Shared (`packages/shared`) | Types, TypeBox schemas, constants (no runtime deps on Elysia/Nuxt/Drizzle) |
 | Ship | Docker Compose (postgres + api + web) |
 
-## Quickstart — local dev
+### Quickstart — local dev
 
 Prerequisites: **Bun >= 1.3**, **Node >= 20**, **PostgreSQL >= 16** running locally.
 
@@ -50,26 +81,7 @@ First run: open `/` — with no admin yet every page redirects to `/setup`.
 Fill the form and the first account becomes the admin. Afterwards `/setup`
 returns `403` and `/login` is the way in.
 
-## Quickstart — Docker (recommended for servers)
-
-Prerequisites: Docker + Docker Compose plugin. No Bun/Node/Postgres needed.
-
-```bash
-cp .env.example .env
-# edit .env — must change POSTGRES_PASSWORD, JWT_SECRET, ANALYTICS_SALT.
-# production: point CORS_ORIGIN, WEB_URL, API_PUBLIC_URL, NUXT_PUBLIC_API_BASE
-#   at your public domains, e.g. https://example.com and https://api.example.com
-docker compose up --build -d
-```
-
-Boot order: `postgres` (healthcheck) → `api` (runs `db:migrate`, then serves
-`:3001`) → `web` (serves `:3000`). Then open `/setup` for the first admin.
-
-- State lives in volumes `pgdata` (database) and `uploads` (avatars/backgrounds).
-- Backup: `docker compose exec postgres pg_dump -U $POSTGRES_USER $POSTGRES_DB > backup.sql`
-- Update: `git pull && docker compose up --build -d` (migrations run automatically)
-
-## Configuration
+### Configuration
 
 `apps/api/.env` (see `apps/api/.env.example`):
 
@@ -93,7 +105,7 @@ Boot order: `postgres` (healthcheck) → `api` (runs `db:migrate`, then serves
 Root `.env` (Docker only, see `.env.example`): postgres credentials, host ports,
 and mirrors of the above.
 
-## Project structure
+### Project structure
 
 ```
 openlynk/
@@ -115,7 +127,7 @@ openlynk/
   turbo.json / package.json / tsconfig.json
 ```
 
-## Scripts (repo root)
+### Scripts (repo root)
 
 | Script | Purpose |
 |---|---|
@@ -126,7 +138,7 @@ openlynk/
 | `bun run lint` | placeholder (no linter configured yet) |
 | `bun run db:generate` / `db:migrate` / `db:studio` | Drizzle workflow (api package) |
 
-## API overview (`/api/v1`)
+### API overview (`/api/v1`)
 
 - `GET /health`, `GET /` — service info
 - Auth: `POST /auth/register` (first account only), `/auth/login`, `/auth/logout`, `/auth/refresh`, `GET /auth/me`, `GET /auth/setup-status`
@@ -140,7 +152,7 @@ Auth uses `HttpOnly; Secure; SameSite=Lax` cookies; mutations additionally
 require an allowlisted `Origin`. All admin reads/writes resolve ownership
 server-side from the JWT — client-supplied ids are never trusted.
 
-## Roadmap
+### Roadmap
 
 - [x] Phase 1 — Architecture & database schema
 - [x] Phase 2 — Backend (auth, links, middlewares)
