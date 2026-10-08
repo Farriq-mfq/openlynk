@@ -1,4 +1,4 @@
-import type { Profile, User } from "@openlynk/shared";
+import type { Admin, Profile } from "@openlynk/shared";
 import { apiMessage } from "./useApi";
 
 export interface LoginInput {
@@ -12,23 +12,38 @@ export interface RegisterInput extends LoginInput {
 }
 
 interface MeResponse {
-  user: User;
+  admin: Admin;
   profile: Profile;
 }
 
 export function useAuth() {
-  const user = useState<User | null>("auth:user", () => null);
+  const admin = useState<Admin | null>("auth:admin", () => null);
   const profile = useState<Profile | null>("auth:profile", () => null);
+  const setupRequired = useState<boolean | null>("auth:setup-required", () => null);
   const api = useApi();
+
+  // Whether the installation still needs its first admin. Cached after the
+  // first check; cleared to false on successful login/register below.
+  async function fetchSetupStatus(): Promise<boolean> {
+    if (setupRequired.value !== null) return setupRequired.value;
+    try {
+      const res = await api<{ setupRequired: boolean }>("/auth/setup-status");
+      setupRequired.value = res.setupRequired;
+      return res.setupRequired;
+    } catch {
+      // API unreachable: fail open so pages surface their own errors.
+      return false;
+    }
+  }
 
   async function fetchMe(): Promise<boolean> {
     try {
       const me = await api<MeResponse>("/auth/me");
-      user.value = me.user;
+      admin.value = me.admin;
       profile.value = me.profile;
       return true;
     } catch {
-      user.value = null;
+      admin.value = null;
       profile.value = null;
       return false;
     }
@@ -40,8 +55,9 @@ export function useAuth() {
         method: "POST",
         body: { email: input.email.trim(), password: input.password },
       });
-      user.value = me.user;
+      admin.value = me.admin;
       profile.value = me.profile;
+      setupRequired.value = false;
       return { ok: true };
     } catch (err) {
       return { ok: false, message: apiMessage(err, "Login failed") };
@@ -59,8 +75,9 @@ export function useAuth() {
           display_name: input.display_name.trim(),
         },
       });
-      user.value = res.user;
+      admin.value = res.admin;
       profile.value = res.profile;
+      setupRequired.value = false;
       return { ok: true };
     } catch (err) {
       return { ok: false, message: apiMessage(err, "Registration failed") };
@@ -73,10 +90,10 @@ export function useAuth() {
     } catch {
       // Cookie may already be gone — still clear local state.
     }
-    user.value = null;
+    admin.value = null;
     profile.value = null;
     await navigateTo("/login");
   }
 
-  return { user, profile, fetchMe, login, register, logout };
+  return { admin, profile, fetchMe, fetchSetupStatus, login, register, logout };
 }

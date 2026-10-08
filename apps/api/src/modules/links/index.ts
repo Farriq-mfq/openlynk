@@ -9,16 +9,16 @@ import {
 import { db } from "../../db";
 import { links } from "../../db/schema";
 import { apiError, stripTags } from "../../lib/http";
-import { resolveUserId } from "../../middlewares/auth";
-import { getOwnedLink, getOwnProfile } from "../../middlewares/ownership";
+import { resolveAdminId } from "../../middlewares/auth";
+import { getAdminProfile, getOwnedLink } from "../../middlewares/ownership";
 
 export const linksModule = new Elysia({ prefix: "/links" })
-  .derive(async ({ cookie }) => ({ userId: await resolveUserId(cookie) }))
-  .onBeforeHandle(({ userId, status }) => {
-    if (!userId) return status(401, apiError("UNAUTHORIZED", "Authentication required"));
+  .derive(async ({ cookie }) => ({ adminId: await resolveAdminId(cookie) }))
+  .onBeforeHandle(({ adminId, status }) => {
+    if (!adminId) return status(401, apiError("UNAUTHORIZED", "Authentication required"));
   })
-  .get("/", async ({ userId, status }) => {
-    const profile = await getOwnProfile(userId as string);
+  .get("/", async ({ adminId, status }) => {
+    const profile = await getAdminProfile(adminId as string);
     if (!profile) return status(404, apiError("PROFILE_NOT_FOUND", "Profile not found"));
     const rows = await db
       .select()
@@ -29,8 +29,8 @@ export const linksModule = new Elysia({ prefix: "/links" })
   })
   .post(
     "/",
-    async ({ body, set, userId, status }) => {
-      const profile = await getOwnProfile(userId as string);
+    async ({ body, set, adminId, status }) => {
+      const profile = await getAdminProfile(adminId as string);
       if (!profile) return status(404, apiError("PROFILE_NOT_FOUND", "Profile not found"));
       // Gapless invariant: next position is always the current count.
       const existing = await db
@@ -55,8 +55,8 @@ export const linksModule = new Elysia({ prefix: "/links" })
   )
   .put(
     "/reorder",
-    async ({ body, userId, status }) => {
-      const profile = await getOwnProfile(userId as string);
+    async ({ body, adminId, status }) => {
+      const profile = await getAdminProfile(adminId as string);
       if (!profile) return status(404, apiError("PROFILE_NOT_FOUND", "Profile not found"));
       const current = await db
         .select({ id: links.id })
@@ -89,8 +89,8 @@ export const linksModule = new Elysia({ prefix: "/links" })
   )
   .put(
     "/:id",
-    async ({ body, params, userId, status }) => {
-      const link = await getOwnedLink(userId as string, params.id);
+    async ({ body, params, adminId, status }) => {
+      const link = await getOwnedLink(adminId as string, params.id);
       if (!link) return status(404, apiError("LINK_NOT_FOUND", "Link not found"));
       const [updated] = await db
         .update(links)
@@ -109,8 +109,8 @@ export const linksModule = new Elysia({ prefix: "/links" })
   )
   .delete(
     "/:id",
-    async ({ params, userId, status }) => {
-      const link = await getOwnedLink(userId as string, params.id);
+    async ({ params, adminId, status }) => {
+      const link = await getOwnedLink(adminId as string, params.id);
       if (!link) return status(404, apiError("LINK_NOT_FOUND", "Link not found"));
       await db.transaction(async (tx) => {
         await tx.delete(links).where(eq(links.id, link.id));

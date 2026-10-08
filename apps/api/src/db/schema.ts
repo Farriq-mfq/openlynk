@@ -13,23 +13,26 @@ import {
 import { relations, sql } from "drizzle-orm";
 import type { ThemeConfig } from "@openlynk/shared";
 
-// users — auth identity only. No profile fields here.
-export const users = pgTable("users", {
+// admins — single-owner auth identity. One row per installation, created by
+// the first POST /api/v1/auth/register (bootstrap). No profile fields here.
+export const admins = pgTable("admins", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: varchar("email", { length: 255 }).notNull().unique(),
   password_hash: text("password_hash").notNull(),
+  name: varchar("name", { length: 80 }).notNull(),
+  status: varchar("status", { length: 16 }).default("active").notNull(),
   created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-// profiles — 1 row per user (MVP). Public page + appearance.
+// profiles — 1 row for the installation (single owner). Public page + appearance.
 export const profiles = pgTable(
   "profiles",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    user_id: uuid("user_id")
+    admin_id: uuid("admin_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" })
+      .references(() => admins.id, { onDelete: "cascade" })
       .unique(),
     username: varchar("username", { length: 30 }).notNull().unique(),
     display_name: varchar("display_name", { length: 80 }).notNull(),
@@ -48,7 +51,7 @@ export const profiles = pgTable(
   },
   (t) => [
     index("profiles_username_idx").on(t.username),
-    index("profiles_user_id_idx").on(t.user_id),
+    index("profiles_admin_id_idx").on(t.admin_id),
     // Static format guard; full validation (blocklist, normalization) lives in TypeBox schemas.
     check("profiles_username_format", sql`${t.username} ~ '^[a-z0-9_]{3,30}$'`),
   ],
@@ -126,23 +129,23 @@ export const refreshTokens = pgTable(
   "refresh_tokens",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    user_id: uuid("user_id")
+    admin_id: uuid("admin_id")
       .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
+      .references(() => admins.id, { onDelete: "cascade" }),
     token_hash: text("token_hash").notNull().unique(),
     expires_at: timestamp("expires_at", { withTimezone: true }).notNull(),
     created_at: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (t) => [index("refresh_tokens_user_idx").on(t.user_id)],
+  (t) => [index("refresh_tokens_admin_idx").on(t.admin_id)],
 );
 
-export const usersRelations = relations(users, ({ one }) => ({
-  profile: one(profiles, { fields: [users.id], references: [profiles.user_id] }),
+export const adminsRelations = relations(admins, ({ one }) => ({
+  profile: one(profiles, { fields: [admins.id], references: [profiles.admin_id] }),
 }));
 
 export const profilesRelations = relations(profiles, ({ one, many }) => ({
-  user: one(users, { fields: [profiles.user_id], references: [users.id] }),
+  admin: one(admins, { fields: [profiles.admin_id], references: [admins.id] }),
   links: many(links),
   profile_views: many(profileViews),
   link_clicks: many(linkClicks),

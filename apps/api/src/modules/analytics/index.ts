@@ -4,8 +4,8 @@ import { AnalyticsRangeQuerySchema } from "@openlynk/shared";
 import { db } from "../../db";
 import { linkClicks, links, profileViews } from "../../db/schema";
 import { apiError } from "../../lib/http";
-import { resolveUserId } from "../../middlewares/auth";
-import { getOwnProfile } from "../../middlewares/ownership";
+import { resolveAdminId } from "../../middlewares/auth";
+import { getAdminProfile } from "../../middlewares/ownership";
 
 function dayKeys(days: number): string[] {
   const keys: string[] = [];
@@ -27,14 +27,14 @@ function dayKey(day: Date | string): string {
 }
 
 export const analyticsModule = new Elysia({ prefix: "/analytics" })
-  .derive(async ({ cookie }) => ({ userId: await resolveUserId(cookie) }))
-  .onBeforeHandle(({ userId, status }) => {
-    if (!userId) return status(401, apiError("UNAUTHORIZED", "Authentication required"));
+  .derive(async ({ cookie }) => ({ adminId: await resolveAdminId(cookie) }))
+  .onBeforeHandle(({ adminId, status }) => {
+    if (!adminId) return status(401, apiError("UNAUTHORIZED", "Authentication required"));
   })
   .get(
     "/summary",
-    async ({ query, userId, status }) => {
-      const profile = await getOwnProfile(userId as string);
+    async ({ query, adminId, status }) => {
+      const profile = await getAdminProfile(adminId as string);
       if (!profile) return status(404, apiError("PROFILE_NOT_FOUND", "Profile not found"));
       const days = query.range === "30d" ? 30 : 7;
       const since = new Date();
@@ -96,8 +96,8 @@ export const analyticsModule = new Elysia({ prefix: "/analytics" })
     },
     { query: AnalyticsRangeQuerySchema },
   )
-  .get("/links", async ({ userId, status }) => {
-    const profile = await getOwnProfile(userId as string);
+  .get("/links", async ({ adminId, status }) => {
+    const profile = await getAdminProfile(adminId as string);
     if (!profile) return status(404, apiError("PROFILE_NOT_FOUND", "Profile not found"));
     const rows = await db
       .select({

@@ -8,16 +8,20 @@ export interface ThemeConfig {
   [key: string]: unknown;
 }
 
-export interface User {
+export type AdminStatus = "active" | "disabled";
+
+export interface Admin {
   id: string;
   email: string;
+  name: string;
+  status: AdminStatus;
   created_at: string;
   updated_at: string;
 }
 
 export interface Profile {
   id: string;
-  user_id: string;
+  admin_id: string;
   username: string;
   display_name: string;
   bio: string | null;

@@ -1,24 +1,34 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../db";
-import { links, profiles } from "../db/schema";
+import { admins, links, profiles } from "../db/schema";
 
-// Server-derived tenancy: callers pass the JWT-verified userId, never a
-// client-supplied user_id/profile_id. Null = not found or not owned (callers 404).
-export async function getOwnProfile(userId: string) {
+// Single-admin tenancy: callers pass the JWT-verified adminId, never a
+// client-supplied admin_id/profile_id. Null = not found (callers 404).
+export async function getAdminProfile(adminId: string) {
   const rows = await db
     .select()
     .from(profiles)
-    .where(eq(profiles.user_id, userId))
+    .where(eq(profiles.admin_id, adminId))
     .limit(1);
   return rows[0] ?? null;
 }
 
-export async function getOwnedLink(userId: string, linkId: string) {
+// Active-status guard: a disabled admin loses API access even with a valid JWT.
+export async function isAdminActive(adminId: string): Promise<boolean> {
+  const rows = await db
+    .select({ status: admins.status })
+    .from(admins)
+    .where(eq(admins.id, adminId))
+    .limit(1);
+  return rows[0]?.status === "active";
+}
+
+export async function getOwnedLink(adminId: string, linkId: string) {
   const rows = await db
     .select({ link: links })
     .from(links)
     .innerJoin(profiles, eq(links.profile_id, profiles.id))
-    .where(and(eq(links.id, linkId), eq(profiles.user_id, userId)))
+    .where(and(eq(links.id, linkId), eq(profiles.admin_id, adminId)))
     .limit(1);
   return rows[0]?.link ?? null;
 }

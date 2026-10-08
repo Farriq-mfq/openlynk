@@ -12,20 +12,20 @@ updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull
 - Every FK MUST declare explicit `references(() => parent.id, { onDelete: "cascade" })`. No orphan rows.
 
 ## 3.2 Core Tables & Relations
-- `users`: auth identity only (`email unique`, `password_hash`). No profile fields here.
-- `profiles`: `user_id unique -> users.id cascade`, `username unique`, `display_name`, `bio`, `avatar_url`, `is_published`, appearance columns (`theme`, `background_color`, `text_color`, `accent_color`, `font_family`, `button_style`) + `theme_config jsonb`.
+- `admins`: single-owner auth identity (`email unique`, `password_hash`, `name`, `status: active | disabled`). Exactly one row per installation, created by the first `POST /api/v1/auth/register`. No profile fields here.
+- `profiles`: `admin_id unique -> admins.id cascade`, `username unique`, `display_name`, `bio`, `avatar_url`, `is_published`, appearance columns (`theme`, `background_color`, `text_color`, `accent_color`, `font_family`, `button_style`) + `theme_config jsonb`.
 - `links`: `profile_id -> profiles.id cascade`, `title`, `url`, `icon`, `is_active`, `position integer`.
 - `profile_views`: `profile_id -> profiles.id cascade`, `viewed_at`, `referrer_domain`, `country_code`, `device_type`, `session_hash`.
 - `link_clicks`: `link_id -> links.id cascade` + denormalized `profile_id -> profiles.id cascade`, `clicked_at`, same anonymized columns.
-- `refresh_tokens`: `user_id -> users.id cascade`, `token_hash unique`, `expires_at`. Required for rotation/revocation.
-- Relations: `users 1-1 profiles 1-N links 1-N link_clicks`, `profiles 1-N profile_views`.
+- `refresh_tokens`: `admin_id -> admins.id cascade`, `token_hash unique`, `expires_at`. Required for rotation/revocation.
+- Relations: `admins 1-1 profiles 1-N links 1-N link_clicks`, `profiles 1-N profile_views`.
 
 ## 3.3 Indices (REQUIRED)
-- `profiles.username UNIQUE` + `index(profiles.username)` + `index(profiles.user_id)`.
+- `profiles.username UNIQUE` + `index(profiles.username)` + `index(profiles.admin_id)`.
 - `index(links.profile_id, links.position)` and `index(links.profile_id, links.is_active)`.
 - `index(profile_views.profile_id, profile_views.viewed_at)`.
 - `index(link_clicks.link_id, link_clicks.clicked_at)` + `index(link_clicks.profile_id, link_clicks.clicked_at)`.
-- `index(refresh_tokens.user_id)`.
+- `index(refresh_tokens.admin_id)`.
 - `position` MUST be gapless `0..N` per `profile_id`. Reorder MUST run in a transaction.
 
 ## 3.4 Naming & Validation

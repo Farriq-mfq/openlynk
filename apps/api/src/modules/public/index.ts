@@ -7,11 +7,29 @@ import { anonymizeSignal } from "../../lib/analytics";
 import { apiError, clientIp } from "../../lib/http";
 
 function publicProfileShape(p: typeof profiles.$inferSelect) {
-  const { user_id: _uid, ...rest } = p;
+  const { admin_id: _aid, ...rest } = p;
   return rest;
 }
 
 export const publicModule = new Elysia({ prefix: "/public" })
+  // Singleton: the installation's single public profile. Lets `/` render the
+  // owner's page directly without a landing page or a username lookup.
+  .get("/profile", async ({ status }) => {
+    const [profile] = await db
+      .select()
+      .from(profiles)
+      .orderBy(asc(profiles.created_at))
+      .limit(1);
+    if (!profile || !profile.is_published) {
+      return status(404, apiError("NOT_FOUND", "Profile not found"));
+    }
+    const rows = await db
+      .select()
+      .from(links)
+      .where(and(eq(links.profile_id, profile.id), eq(links.is_active, true)))
+      .orderBy(asc(links.position));
+    return { profile: publicProfileShape(profile), links: rows };
+  })
   .get(
     "/:username",
     async ({ params, status }) => {

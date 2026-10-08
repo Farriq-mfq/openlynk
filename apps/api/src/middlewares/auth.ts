@@ -1,10 +1,10 @@
 import { ACCESS_COOKIE, verifyToken } from "../lib/jwt";
 
-// Resolves the JWT subject from the access_token HttpOnly cookie.
+// Resolves the JWT subject (the single admin id) from the access_token HttpOnly cookie.
 // IMPORTANT (Elysia 1.4): derive() state does NOT propagate types through
 // .use(plugin), so every protected module calls this inside its OWN local
 // .derive() instead of sharing a plugin. See probe notes in git history.
-export async function resolveUserId(
+export async function resolveAdminId(
   cookie: Record<string, { value?: unknown } | undefined> | undefined,
 ): Promise<string | null> {
   const raw = cookie?.[ACCESS_COOKIE]?.value;
