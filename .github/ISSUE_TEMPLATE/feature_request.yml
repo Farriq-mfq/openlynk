@@ -1,0 +1,26 @@
+name: Feature request
+description: Propose something new
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: Whose day gets better, and how.
+      placeholder: As a page owner I want to pin one link at the top so visitors see it first.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Your idea of how it should work.
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other ways to solve it, and why not.
+    validations:
+      required: false
