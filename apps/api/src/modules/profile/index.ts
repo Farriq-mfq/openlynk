@@ -8,24 +8,24 @@ import {
 import { db } from "../../db";
 import { profiles } from "../../db/schema";
 import { apiError, stripTags } from "../../lib/http";
-import { resolveUserId } from "../../middlewares/auth";
-import { getOwnProfile } from "../../middlewares/ownership";
+import { resolveAdminId } from "../../middlewares/auth";
+import { getAdminProfile } from "../../middlewares/ownership";
 
 export const profileModule = new Elysia({ prefix: "/profile" })
-  .derive(async ({ cookie }) => ({ userId: await resolveUserId(cookie) }))
-  .onBeforeHandle(({ userId, status }) => {
-    if (!userId) return status(401, apiError("UNAUTHORIZED", "Authentication required"));
+  .derive(async ({ cookie }) => ({ adminId: await resolveAdminId(cookie) }))
+  .onBeforeHandle(({ adminId, status }) => {
+    if (!adminId) return status(401, apiError("UNAUTHORIZED", "Authentication required"));
   })
-  .get("/me", async ({ userId, status }) => {
-    const profile = await getOwnProfile(userId as string);
+  .get("/me", async ({ adminId, status }) => {
+    const profile = await getAdminProfile(adminId as string);
     if (!profile) return status(404, apiError("PROFILE_NOT_FOUND", "Profile not found"));
     return { profile };
   })
   .put(
     "/me",
-    async ({ body, userId, status }) => {
-      const uid = userId as string;
-      const profile = await getOwnProfile(uid);
+    async ({ body, adminId, status }) => {
+      const aid = adminId as string;
+      const profile = await getAdminProfile(aid);
       if (!profile) return status(404, apiError("PROFILE_NOT_FOUND", "Profile not found"));
 
       let username = profile.username;
@@ -64,8 +64,8 @@ export const profileModule = new Elysia({ prefix: "/profile" })
   )
   .put(
     "/appearance",
-    async ({ body, userId, status }) => {
-      const profile = await getOwnProfile(userId as string);
+    async ({ body, adminId, status }) => {
+      const profile = await getAdminProfile(adminId as string);
       if (!profile) return status(404, apiError("PROFILE_NOT_FOUND", "Profile not found"));
 
       const [updated] = await db

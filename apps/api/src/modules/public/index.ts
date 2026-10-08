@@ -7,7 +7,7 @@ import { anonymizeSignal } from "../../lib/analytics";
 import { apiError, clientIp } from "../../lib/http";
 
 function publicProfileShape(p: typeof profiles.$inferSelect) {
-  const { user_id: _uid, ...rest } = p;
+  const { admin_id: _aid, ...rest } = p;
   return rest;
 }
 

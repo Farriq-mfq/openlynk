@@ -21,6 +21,7 @@
     "lint": "turbo lint",
     "db:generate": "bun --filter @openlynk/api db:generate",
     "db:migrate": "bun --filter @openlynk/api db:migrate",
+    "db:seed": "bun --filter @openlynk/api db:seed",
     "db:studio": "bun --filter @openlynk/api db:studio"
   },
   "devDependencies": {
