@@ -1,0 +1,211 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/*
+ * OpenLynk design tokens (exported from the Nuxt UI Theme Builder as JSON,
+ * translated here into the two-file format the builder itself emits:
+ * app.config.ts (semantic slot mapping) + this stylesheet (values).
+ *
+ * Resolution chain (verified against @nuxt/ui's generated ui.css):
+ *   bg-primary      -> --color-primary      -> var(--ui-primary)
+ *   bg-primary-600  -> --color-primary-600  -> var(--ui-color-primary-600)
+ *   text-muted      -> --text-color-muted   -> var(--ui-text-muted)
+ *   border-default  -> --border-color-default -> var(--ui-border)
+ * This file defines every --ui-* value; nothing is left to fallbacks.
+ */
+
+@theme {
+  --font-sans: "Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* Radix mauve (authoritative sRGB hexes, radix-ui/colors). Tailwind v4 has
+     no mauve palette, so it is declared here for the `neutral` slot. */
+  --color-mauve-50: #fdfcfd;
+  --color-mauve-100: #faf9fb;
+  --color-mauve-200: #f2eff3;
+  --color-mauve-300: #eae7ec;
+  --color-mauve-400: #bcbac7;
+  --color-mauve-500: #8e8c99;
+  --color-mauve-600: #84828e;
+  --color-mauve-700: #65636d;
+  /* 800/950 have no Radix single-step equivalent on the 50-950 grid, so they
+     are interpolated (documented, reproducible) instead of hand-picked. */
+  --color-mauve-800: color-mix(in srgb, #65636d 50%, #211f26);
+  --color-mauve-900: #211f26;
+  --color-mauve-950: color-mix(in srgb, #211f26 80%, black);
+
+  /* Custom brand palette from the theme builder (single source hex #00dc82).
+     Tints/shades are derived with color-mix around the 500 anchor. */
+  --color-nuxt-green-50: color-mix(in oklab, #00dc82 10%, white);
+  --color-nuxt-green-100: color-mix(in oklab, #00dc82 20%, white);
+  --color-nuxt-green-200: color-mix(in oklab, #00dc82 35%, white);
+  --color-nuxt-green-300: color-mix(in oklab, #00dc82 52%, white);
+  --color-nuxt-green-400: color-mix(in oklab, #00dc82 72%, white);
+  --color-nuxt-green-500: #00dc82;
+  --color-nuxt-green-600: color-mix(in oklab, #00dc82 88%, black);
+  --color-nuxt-green-700: color-mix(in oklab, #00dc82 72%, black);
+  --color-nuxt-green-800: color-mix(in oklab, #00dc82 55%, black);
+  --color-nuxt-green-900: color-mix(in oklab, #00dc82 38%, black);
+  --color-nuxt-green-950: color-mix(in oklab, #00dc82 24%, black);
+}
+
+:root {
+  --ui-radius: 1.314rem;
+
+  /* Neutral ramp: the runtime injector maps neutral -> a nonexistent
+     `old-neutral` var with an empty fallback, so mauve is wired explicitly. */
+  --ui-color-neutral-50: var(--color-mauve-50);
+  --ui-color-neutral-100: var(--color-mauve-100);
+  --ui-color-neutral-200: var(--color-mauve-200);
+  --ui-color-neutral-300: var(--color-mauve-300);
+  --ui-color-neutral-400: var(--color-mauve-400);
+  --ui-color-neutral-500: var(--color-mauve-500);
+  --ui-color-neutral-600: var(--color-mauve-600);
+  --ui-color-neutral-700: var(--color-mauve-700);
+  --ui-color-neutral-800: var(--color-mauve-800);
+  --ui-color-neutral-900: var(--color-mauve-900);
+  --ui-color-neutral-950: var(--color-mauve-950);
+
+  /* Default (solid) shades per semantic role — light mode. */
+  --ui-primary: var(--ui-color-primary-600);
+  --ui-secondary: var(--ui-color-secondary-600);
+  --ui-success: var(--ui-color-success-600);
+  --ui-info: var(--ui-color-info-600);
+  --ui-warning: var(--ui-color-warning-600);
+  --ui-error: var(--ui-color-error-600);
+  --ui-nuxt-green: var(--ui-color-nuxt-green-500);
+
+  /* Text / background / border tones — light mode. */
+  --ui-text-dimmed: var(--ui-color-neutral-400);
+  --ui-text-muted: var(--ui-color-neutral-500);
+  --ui-text-toned: var(--ui-color-neutral-600);
+  --ui-text: var(--ui-color-neutral-700);
+  --ui-text-highlighted: var(--ui-color-neutral-900);
+  --ui-text-inverted: #fff;
+
+  --ui-bg: #fff;
+  --ui-bg-muted: var(--ui-color-neutral-50);
+  --ui-bg-elevated: var(--ui-color-neutral-100);
+  --ui-bg-accented: var(--ui-color-neutral-200);
+  --ui-bg-inverted: var(--ui-color-neutral-900);
+
+  --ui-border: var(--ui-color-neutral-200);
+  --ui-border-muted: var(--ui-color-neutral-200);
+  --ui-border-accented: var(--ui-color-neutral-300);
+  --ui-border-inverted: var(--ui-color-neutral-900);
+}
+
+.dark {
+  --ui-radius: 1.314rem;
+
+  /* Aliases re-point at dark-mode palettes; neutral ramp becomes zinc. */
+  --ui-color-primary-50: var(--color-violet-50);
+  --ui-color-primary-100: var(--color-violet-100);
+  --ui-color-primary-200: var(--color-violet-200);
+  --ui-color-primary-300: var(--color-violet-300);
+  --ui-color-primary-400: var(--color-violet-400);
+  --ui-color-primary-500: var(--color-violet-500);
+  --ui-color-primary-600: var(--color-violet-600);
+  --ui-color-primary-700: var(--color-violet-700);
+  --ui-color-primary-800: var(--color-violet-800);
+  --ui-color-primary-900: var(--color-violet-900);
+  --ui-color-primary-950: var(--color-violet-950);
+
+  --ui-color-secondary-50: var(--color-pink-50);
+  --ui-color-secondary-100: var(--color-pink-100);
+  --ui-color-secondary-200: var(--color-pink-200);
+  --ui-color-secondary-300: var(--color-pink-300);
+  --ui-color-secondary-400: var(--color-pink-400);
+  --ui-color-secondary-500: var(--color-pink-500);
+  --ui-color-secondary-600: var(--color-pink-600);
+  --ui-color-secondary-700: var(--color-pink-700);
+  --ui-color-secondary-800: var(--color-pink-800);
+  --ui-color-secondary-900: var(--color-pink-900);
+  --ui-color-secondary-950: var(--color-pink-950);
+
+  --ui-color-success-50: var(--color-green-50);
+  --ui-color-success-100: var(--color-green-100);
+  --ui-color-success-200: var(--color-green-200);
+  --ui-color-success-300: var(--color-green-300);
+  --ui-color-success-400: var(--color-green-400);
+  --ui-color-success-500: var(--color-green-500);
+  --ui-color-success-600: var(--color-green-600);
+  --ui-color-success-700: var(--color-green-700);
+  --ui-color-success-800: var(--color-green-800);
+  --ui-color-success-900: var(--color-green-900);
+  --ui-color-success-950: var(--color-green-950);
+
+  --ui-color-info-50: var(--color-sky-50);
+  --ui-color-info-100: var(--color-sky-100);
+  --ui-color-info-200: var(--color-sky-200);
+  --ui-color-info-300: var(--color-sky-300);
+  --ui-color-info-400: var(--color-sky-400);
+  --ui-color-info-500: var(--color-sky-500);
+  --ui-color-info-600: var(--color-sky-600);
+  --ui-color-info-700: var(--color-sky-700);
+  --ui-color-info-800: var(--color-sky-800);
+  --ui-color-info-900: var(--color-sky-900);
+  --ui-color-info-950: var(--color-sky-950);
+
+  --ui-color-warning-50: var(--color-amber-50);
+  --ui-color-warning-100: var(--color-amber-100);
+  --ui-color-warning-200: var(--color-amber-200);
+  --ui-color-warning-300: var(--color-amber-300);
+  --ui-color-warning-400: var(--color-amber-400);
+  --ui-color-warning-500: var(--color-amber-500);
+  --ui-color-warning-600: var(--color-amber-600);
+  --ui-color-warning-700: var(--color-amber-700);
+  --ui-color-warning-800: var(--color-amber-800);
+  --ui-color-warning-900: var(--color-amber-900);
+  --ui-color-warning-950: var(--color-amber-950);
+
+  --ui-color-error-50: var(--color-pink-50);
+  --ui-color-error-100: var(--color-pink-100);
+  --ui-color-error-200: var(--color-pink-200);
+  --ui-color-error-300: var(--color-pink-300);
+  --ui-color-error-400: var(--color-pink-400);
+  --ui-color-error-500: var(--color-pink-500);
+  --ui-color-error-600: var(--color-pink-600);
+  --ui-color-error-700: var(--color-pink-700);
+  --ui-color-error-800: var(--color-pink-800);
+  --ui-color-error-900: var(--color-pink-900);
+  --ui-color-error-950: var(--color-pink-950);
+
+  --ui-color-neutral-50: var(--color-zinc-50);
+  --ui-color-neutral-100: var(--color-zinc-100);
+  --ui-color-neutral-200: var(--color-zinc-200);
+  --ui-color-neutral-300: var(--color-zinc-300);
+  --ui-color-neutral-400: var(--color-zinc-400);
+  --ui-color-neutral-500: var(--color-zinc-500);
+  --ui-color-neutral-600: var(--color-zinc-600);
+  --ui-color-neutral-700: var(--color-zinc-700);
+  --ui-color-neutral-800: var(--color-zinc-800);
+  --ui-color-neutral-900: var(--color-zinc-900);
+  --ui-color-neutral-950: var(--color-zinc-950);
+
+  /* Default (solid) shades per semantic role — dark mode. */
+  --ui-primary: var(--ui-color-primary-500);
+  --ui-secondary: var(--ui-color-secondary-500);
+  --ui-success: var(--ui-color-success-500);
+  --ui-info: var(--ui-color-info-500);
+  --ui-warning: var(--ui-color-warning-500);
+  --ui-error: var(--ui-color-error-500);
+
+  /* Text / background / border tones — dark mode. */
+  --ui-text-dimmed: var(--ui-color-neutral-500);
+  --ui-text-muted: var(--ui-color-neutral-400);
+  --ui-text-toned: var(--ui-color-neutral-300);
+  --ui-text: var(--ui-color-neutral-200);
+  --ui-text-highlighted: #fff;
+  --ui-text-inverted: var(--ui-color-neutral-900);
+
+  --ui-bg: var(--ui-color-neutral-900);
+  --ui-bg-muted: var(--ui-color-neutral-800);
+  --ui-bg-elevated: var(--ui-color-neutral-800);
+  --ui-bg-accented: var(--ui-color-neutral-700);
+  --ui-bg-inverted: #fff;
+
+  --ui-border: var(--ui-color-neutral-800);
+  --ui-border-muted: var(--ui-color-neutral-700);
+  --ui-border-accented: var(--ui-color-neutral-700);
+  --ui-border-inverted: #fff;
+}

@@ -1,0 +1,30 @@
+{
+  "name": "openlynk",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.3.14",
+  "workspaces": [
+    "apps/web",
+    "apps/api",
+    "packages/shared"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "dev:web": "bun --filter @openlynk/web dev",
+    "dev:api": "bun --filter @openlynk/api dev",
+    "build": "turbo build",
+    "build:web": "bun --filter @openlynk/web build",
+    "build:api": "bun --filter @openlynk/api build",
+    "start": "turbo start",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint",
+    "db:generate": "bun --filter @openlynk/api db:generate",
+    "db:migrate": "bun --filter @openlynk/api db:migrate",
+    "db:studio": "bun --filter @openlynk/api db:studio"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5.9.2"
+  }
+}

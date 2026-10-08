@@ -1,0 +1,29 @@
+{
+  "name": "@openlynk/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --target bun --outdir dist",
+    "start": "bun dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo \"(no linter configured)\"",
+    "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config=drizzle.config.ts",
+    "db:studio": "drizzle-kit studio --config=drizzle.config.ts"
+  },
+  "dependencies": {
+    "elysia": "^1.4.4",
+    "@elysiajs/cors": "^1.4.0",
+    "@openlynk/shared": "workspace:*",
+    "drizzle-orm": "^0.44.0",
+    "jose": "^6.0.0",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.0",
+    "typescript": "^5.9.2"
+  }
+}

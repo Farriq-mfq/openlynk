@@ -1,0 +1,30 @@
+# deps
+node_modules/
+.bun/
+
+# builds
+dist/
+.output/
+.nuxt/
+.nitro/
+.cache/
+.turbo/
+
+# env
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+logs/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# nuxt
+nuxt.d.ts

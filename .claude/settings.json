@@ -1,0 +1,48 @@
+{
+  "$schema": "https://claude.ai/code-settings-schema.json",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "Bash(bun install:*)",
+      "Bash(bun run dev:*)",
+      "Bash(bun run dev:web:*)",
+      "Bash(bun run dev:api:*)",
+      "Bash(bun run build:*)",
+      "Bash(bun run typecheck:*)",
+      "Bash(bun run lint:*)",
+      "Bash(bun run test:*)",
+      "Bash(bun test:*)",
+      "Bash(bun --filter *:*)",
+      "Bash(bunx tsc --noEmit:*)",
+      "Bash(bunx eslint *:*)"
+    ],
+    "ask": [
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(docker compose:*)",
+      "Bash(bun run db:*)",
+      "Bash(bunx drizzle-kit *:*)",
+      "Bash(bunx drizzle *:*)",
+      "Edit(.env:*)",
+      "Edit(**/.env:*)",
+      "Write(**/.env:*)",
+      "Write(**/docker-compose.yml:*)",
+      "Write(**/Dockerfile:*)"
+    ],
+    "deny": [
+      "Bash(npm:*)",
+      "Bash(npx:*)",
+      "Bash(yarn:*)",
+      "Bash(pnpm:*)",
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)",
+      "Bash(chmod -R:*)",
+      "Read(.env)",
+      "Read(**/.env)"
+    ]
+  },
+  "hooks": {},
+  "env": {}
+}

@@ -1,0 +1,28 @@
+{
+  "name": "@openlynk/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev --port 3000",
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview --port 3000",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
+    "lint": "echo \"(no linter configured)\""
+  },
+  "dependencies": {
+    "@nuxt/ui": "^4.0.0",
+    "@openlynk/shared": "workspace:*",
+    "nuxt": "^4.0.3",
+    "tailwindcss": "^4.0.0",
+    "vue": "^3.5.18",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@iconify-json/lucide": "^1.0.0",
+    "typescript": "^5.9.2",
+    "vue-tsc": "^2.2.12"
+  }
+}
