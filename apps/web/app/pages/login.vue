@@ -40,7 +40,8 @@ async function onSubmit(): Promise<void> {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center p-4">
+  <div class="min-h-screen flex items-center justify-center p-4 relative">
+    <UColorModeButton class="absolute top-4 right-4" />
     <UCard class="w-full max-w-md">
       <template #header>
         <div class="flex flex-col items-center gap-2 py-2">
