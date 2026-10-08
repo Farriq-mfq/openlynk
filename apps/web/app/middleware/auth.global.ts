@@ -1,11 +1,11 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-  const { user, fetchMe } = useAuth();
-  if (!user.value) await fetchMe();
+  const { admin, fetchMe } = useAuth();
+  if (!admin.value) await fetchMe();
 
-  if (to.path.startsWith("/dashboard") && !user.value) {
+  if (to.path.startsWith("/dashboard") && !admin.value) {
     return navigateTo("/login");
   }
-  if ((to.path === "/login" || to.path === "/register") && user.value) {
+  if (to.path === "/login" && admin.value) {
     return navigateTo("/dashboard");
   }
 });

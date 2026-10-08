@@ -62,8 +62,7 @@ async function onSubmit(): Promise<void> {
 
       <template #footer>
         <p class="text-sm text-center text-muted">
-          No account yet?
-          <NuxtLink to="/register" class="text-primary font-medium">Create one</NuxtLink>
+          Single-admin installation — the account is created via <code>bun run db:seed</code>.
         </p>
       </template>
     </UCard>

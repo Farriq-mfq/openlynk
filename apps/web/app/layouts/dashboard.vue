@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { user, profile, logout } = useAuth();
+const { admin, profile, logout } = useAuth();
 
 const navItems = [
   { label: "Overview", icon: "i-lucide-layout-dashboard", to: "/dashboard" },
@@ -40,7 +40,7 @@ const publicPath = computed(() => (profile.value ? `/${profile.value.username}` 
           class="justify-start"
           @click="logout()"
         >
-          Sign out{{ user ? ` (${user.email})` : "" }}
+          Sign out{{ admin ? ` (${admin.email})` : "" }}
         </UButton>
       </div>
     </aside>

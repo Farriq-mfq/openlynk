@@ -17,7 +17,7 @@ useSeoMeta({
         </span>
         <div class="flex gap-2">
           <UButton to="/login" variant="ghost" color="neutral">Sign in</UButton>
-          <UButton to="/register">Get started</UButton>
+          <UButton to="/login">Sign in</UButton>
         </div>
       </div>
     </header>
@@ -30,7 +30,7 @@ useSeoMeta({
           no trackers, no lock-in.
         </p>
         <div class="flex flex-wrap justify-center gap-2 mt-2">
-          <UButton to="/register" size="lg" icon="i-lucide-rocket">Claim your page</UButton>
+          <UButton to="/login" size="lg" icon="i-lucide-rocket">Open dashboard</UButton>
           <UButton to="/login" size="lg" variant="outline">Sign in</UButton>
         </div>
       </div>

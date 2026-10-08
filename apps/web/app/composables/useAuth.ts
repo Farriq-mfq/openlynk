@@ -1,4 +1,4 @@
-import type { Profile, User } from "@openlynk/shared";
+import type { Admin, Profile } from "@openlynk/shared";
 import { apiMessage } from "./useApi";
 
 export interface LoginInput {
@@ -6,29 +6,24 @@ export interface LoginInput {
   password: string;
 }
 
-export interface RegisterInput extends LoginInput {
-  username: string;
-  display_name: string;
-}
-
 interface MeResponse {
-  user: User;
+  admin: Admin;
   profile: Profile;
 }
 
 export function useAuth() {
-  const user = useState<User | null>("auth:user", () => null);
+  const admin = useState<Admin | null>("auth:admin", () => null);
   const profile = useState<Profile | null>("auth:profile", () => null);
   const api = useApi();
 
   async function fetchMe(): Promise<boolean> {
     try {
       const me = await api<MeResponse>("/auth/me");
-      user.value = me.user;
+      admin.value = me.admin;
       profile.value = me.profile;
       return true;
     } catch {
-      user.value = null;
+      admin.value = null;
       profile.value = null;
       return false;
     }
@@ -40,30 +35,11 @@ export function useAuth() {
         method: "POST",
         body: { email: input.email.trim(), password: input.password },
       });
-      user.value = me.user;
+      admin.value = me.admin;
       profile.value = me.profile;
       return { ok: true };
     } catch (err) {
       return { ok: false, message: apiMessage(err, "Login failed") };
-    }
-  }
-
-  async function register(input: RegisterInput): Promise<{ ok: boolean; message?: string }> {
-    try {
-      const res = await api<MeResponse>("/auth/register", {
-        method: "POST",
-        body: {
-          email: input.email.trim(),
-          password: input.password,
-          username: input.username.trim(),
-          display_name: input.display_name.trim(),
-        },
-      });
-      user.value = res.user;
-      profile.value = res.profile;
-      return { ok: true };
-    } catch (err) {
-      return { ok: false, message: apiMessage(err, "Registration failed") };
     }
   }
 
@@ -73,10 +49,10 @@ export function useAuth() {
     } catch {
       // Cookie may already be gone — still clear local state.
     }
-    user.value = null;
+    admin.value = null;
     profile.value = null;
     await navigateTo("/login");
   }
 
-  return { user, profile, fetchMe, login, register, logout };
+  return { admin, profile, fetchMe, login, logout };
 }
