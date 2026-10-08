@@ -188,8 +188,8 @@ Single Admin
         └── Custom Domains (domain → installation, never domain → user)
 ```
 
-- Identity: `admins` table (`email unique`, `password_hash`, `name`, `status: active | disabled`). No `users` table, no public registration endpoint or page, no roles/teams/organizations. The sole admin is created by `bun run db:seed` from `ADMIN_NAME`/`ADMIN_EMAIL`/`ADMIN_PASSWORD`.
-- Auth surface: `POST /api/v1/auth/login`, `POST /api/v1/auth/logout` (+ refresh), `GET /api/v1/auth/me`. Dashboard (`/dashboard/*`, guarded by `auth.global.ts`) requires an `active` admin JWT; `/login` stays public. A `disabled` status rejects at login, refresh, and `/me`.
+- Identity: `admins` table (`email unique`, `password_hash`, `name`, `status: active | disabled`). No `users` table, no roles/teams/organizations. Bootstrap is first-register-is-admin: `POST /api/v1/auth/register` succeeds only while zero admins exist (creating admin + profile atomically); afterwards it returns `403 REGISTRATION_CLOSED`. No seeder, no other account-creation path.
+- Auth surface: `POST /api/v1/auth/register` (bootstrap-only), `POST /api/v1/auth/login`, `POST /api/v1/auth/logout` (+ refresh), `GET /api/v1/auth/me`. The `/register` page is the first-setup screen; dashboard (`/dashboard/*`, guarded by `auth.global.ts`) requires an `active` admin JWT; `/login` stays public. A `disabled` status rejects at login, refresh, and `/me`.
 - Tenancy: every protected read/write resolves through `profiles.admin_id = auth.adminId` (helpers `getAdminProfile`/`getOwnedLink`). Do NOT add `userId`/`ownerId`/`tenantId`/`organizationId`/`workspaceId` to new tables — relate new entities to the profile chain (or keep them installation-global where ownership is meaningless, e.g. donation settings). New modules MUST NOT reintroduce per-user scoping.
 - Customers/students/attendees/donors are external records (email + minimal PII), never admin accounts, and never gain dashboard access.
 - SaaS billing (Phase 13 platform track: Free/Pro/Business) is deferred and NOT required for the self-hosted installation. Customer-facing subscriptions/memberships may proceed without it.

@@ -12,7 +12,7 @@ updated_at: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull
 - Every FK MUST declare explicit `references(() => parent.id, { onDelete: "cascade" })`. No orphan rows.
 
 ## 3.2 Core Tables & Relations
-- `admins`: single-owner auth identity (`email unique`, `password_hash`, `name`, `status: active | disabled`). Exactly one row per installation, created by `bun run db:seed`. No public registration. No profile fields here.
+- `admins`: single-owner auth identity (`email unique`, `password_hash`, `name`, `status: active | disabled`). Exactly one row per installation, created by the first `POST /api/v1/auth/register`. No profile fields here.
 - `profiles`: `admin_id unique -> admins.id cascade`, `username unique`, `display_name`, `bio`, `avatar_url`, `is_published`, appearance columns (`theme`, `background_color`, `text_color`, `accent_color`, `font_family`, `button_style`) + `theme_config jsonb`.
 - `links`: `profile_id -> profiles.id cascade`, `title`, `url`, `icon`, `is_active`, `position integer`.
 - `profile_views`: `profile_id -> profiles.id cascade`, `viewed_at`, `referrer_domain`, `country_code`, `device_type`, `session_hash`.
