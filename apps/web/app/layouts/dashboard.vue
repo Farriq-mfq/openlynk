@@ -1,12 +1,24 @@
 <script setup lang="ts">
 const { admin, profile, logout } = useAuth();
 
-const navItems = [
-  { label: "Overview", icon: "i-lucide-layout-dashboard", to: "/dashboard" },
-  { label: "Links", icon: "i-lucide-link", to: "/dashboard/links" },
-  { label: "Appearance", icon: "i-lucide-palette", to: "/dashboard/appearance" },
-  { label: "Analytics", icon: "i-lucide-bar-chart-3", to: "/dashboard/analytics" },
+const navGroups = [
+  {
+    label: "Manage",
+    items: [
+      { label: "Overview", icon: "i-lucide-layout-dashboard", to: "/dashboard" },
+      { label: "Links", icon: "i-lucide-link", to: "/dashboard/links" },
+    ],
+  },
+  {
+    label: "Customize",
+    items: [{ label: "Appearance", icon: "i-lucide-palette", to: "/dashboard/appearance" }],
+  },
+  {
+    label: "Insights",
+    items: [{ label: "Analytics", icon: "i-lucide-bar-chart-3", to: "/dashboard/analytics" }],
+  },
 ];
+const flatNav = navGroups.flatMap((group) => group.items);
 
 const publicPath = computed(() => (profile.value ? `/${profile.value.username}` : null));
 </script>
@@ -22,7 +34,12 @@ const publicPath = computed(() => (profile.value ? `/${profile.value.username}` 
         <UColorModeButton size="sm" variant="ghost" color="neutral" />
       </div>
 
-      <UNavigationMenu :items="navItems" orientation="vertical" class="flex-1" />
+      <nav class="flex-1 flex flex-col gap-4">
+        <div v-for="group in navGroups" :key="group.label">
+          <p class="px-2 pb-1 text-xs font-medium uppercase tracking-wide text-muted">{{ group.label }}</p>
+          <UNavigationMenu :items="group.items" orientation="vertical" />
+        </div>
+      </nav>
 
       <div class="flex flex-col gap-1 border-t border-default pt-3">
         <UButton
@@ -66,7 +83,7 @@ const publicPath = computed(() => (profile.value ? `/${profile.value.username}` 
             />
           </div>
         </div>
-        <UNavigationMenu :items="navItems" orientation="horizontal" />
+        <UNavigationMenu :items="flatNav" orientation="horizontal" />
       </header>
 
       <main class="p-4 sm:p-6 lg:p-8 mx-auto w-full max-w-5xl">

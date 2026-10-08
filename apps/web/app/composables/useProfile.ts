@@ -1,4 +1,4 @@
-import type { Profile } from "@openlynk/shared";
+import type { Profile, ThemeConfig } from "@openlynk/shared";
 import { apiMessage } from "./useApi";
 import { useAuth } from "./useAuth";
 
@@ -17,6 +17,7 @@ export interface AppearanceForm {
   accent_color: string;
   font_family: string;
   button_style: string;
+  theme_config?: ThemeConfig;
 }
 
 export function useProfile() {
@@ -58,6 +59,7 @@ export function useProfile() {
           accent_color: form.accent_color,
           font_family: form.font_family,
           button_style: form.button_style,
+          theme_config: form.theme_config,
         },
       });
       profile.value = res.profile;
@@ -69,5 +71,16 @@ export function useProfile() {
     }
   }
 
-  return { profile, saving, saveProfile, saveAppearance };
+  async function uploadImage(file: File): Promise<{ ok: boolean; url?: string; message?: string }> {
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await api<{ url: string }>("/uploads/image", { method: "POST", body: form });
+      return { ok: true, url: res.url };
+    } catch (err) {
+      return { ok: false, message: apiMessage(err, "Upload failed") };
+    }
+  }
+
+  return { profile, saving, saveProfile, saveAppearance, uploadImage };
 }
