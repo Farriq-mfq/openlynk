@@ -57,3 +57,26 @@ openlynk/
 - `GET /` → info service
 - `GET /health` → healthcheck
 - `GET /api/hello?name=X` → contoh JSON
+
+## Self-hosting (Docker)
+
+Prasyarat: Docker + Docker Compose plugin di VPS. Tidak perlu Bun/Node/Postgres lokal.
+
+```bash
+cp .env.example .env
+# edit .env — wajib ganti POSTGRES_PASSWORD, JWT_SECRET, ANALYTICS_SALT
+# production: sesuaikan CORS_ORIGIN, WEB_URL, API_PUBLIC_URL, NUXT_PUBLIC_API_BASE
+#   ke domain publik, mis. https://example.com dan https://api.example.com
+docker compose up --build -d
+```
+
+Yang terjadi saat boot: `postgres` start + healthcheck, `api` jalanin
+`db:migrate` otomatis lalu serve di `:3001`, `web` serve di `:3000`.
+
+Setup pertama: buka web (`/`), isi form `/setup` — pendaftar pertama jadi
+admin, setelah itu registrasi tertutup (`403`). Tidak ada seeder.
+
+Data persisten di volume `pgdata` (postgres) dan `uploads` (file avatar/background).
+Backup cepat: `docker compose exec postgres pg_dump -U $POSTGRES_USER $POSTGRES_DB > backup.sql`.
+
+Update: `git pull && docker compose up --build -d` (migrasi jalan otomatis).
