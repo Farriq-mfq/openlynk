@@ -5,6 +5,7 @@ import { authModule } from "./modules/auth";
 import { linksModule } from "./modules/links";
 import { profileModule } from "./modules/profile";
 import { publicModule } from "./modules/public";
+import { uploadsModule } from "./modules/uploads";
 import { apiError, allowedOrigins, csrfAllowed } from "./lib/http";
 
 const PORT = Number(process.env.PORT ?? 3001);
@@ -50,7 +51,13 @@ const app = new Elysia()
     timestamp: new Date().toISOString(),
   }))
   .group("/api/v1", (api) =>
-    api.use(authModule).use(profileModule).use(linksModule).use(analyticsModule).use(publicModule),
+    api
+      .use(authModule)
+      .use(profileModule)
+      .use(linksModule)
+      .use(analyticsModule)
+      .use(publicModule)
+      .use(uploadsModule),
   )
   .listen(PORT);
 

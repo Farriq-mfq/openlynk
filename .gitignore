@@ -14,6 +14,8 @@ dist/
 .env
 .env.*
 !.env.example
+# uploads (runtime user files, served by the api; mount a volume in docker)
+apps/api/uploads/
 
 # logs
 *.log
