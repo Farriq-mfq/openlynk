@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { and, eq, ne } from "drizzle-orm";
 import {
   AppearanceSchema,
+  HTTP_URL_PATTERN,
   RESERVED_USERNAMES,
   UpdateProfileSchema,
 } from "@openlynk/shared";
@@ -67,6 +68,16 @@ export const profileModule = new Elysia({ prefix: "/profile" })
     async ({ body, adminId, status }) => {
       const profile = await getAdminProfile(adminId as string);
       if (!profile) return status(404, apiError("PROFILE_NOT_FOUND", "Profile not found"));
+
+      // theme_config is free-form: pin the background URL to http(s) so no
+      // javascript:/data: URI can reach the public page's inline style.
+      const bgUrl = (body.theme_config as { background_image_url?: unknown } | undefined)
+        ?.background_image_url;
+      if (bgUrl !== undefined && bgUrl !== null && bgUrl !== "") {
+        if (typeof bgUrl !== "string" || !HTTP_URL_PATTERN.test(bgUrl.trim())) {
+          return status(400, apiError("INVALID_BACKGROUND_URL", "Background image must be an http(s) URL"));
+        }
+      }
 
       const [updated] = await db
         .update(profiles)

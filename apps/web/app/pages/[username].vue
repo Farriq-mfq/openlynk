@@ -70,8 +70,22 @@ const fontStacks: Record<string, string> = {
   mono: "ui-monospace, SFMono-Regular, Menlo, monospace",
 };
 
+const backgroundImageUrl = computed(() => {
+  const raw = profile.value.theme_config?.background_image_url;
+  if (typeof raw !== "string" || !raw.trim()) return null;
+  return safeUrl(raw.trim());
+});
+
 const pageStyle = computed(() => ({
   backgroundColor: profile.value.background_color,
+  ...(backgroundImageUrl.value
+    ? {
+        backgroundImage: `url("${backgroundImageUrl.value}")`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+      }
+    : {}),
   color: profile.value.text_color,
   fontFamily: fontStacks[profile.value.font_family] ?? fontStacks.inter,
 }));
@@ -98,7 +112,7 @@ function buttonStyle(): Record<string, string> {
 }
 
 function safeUrl(url: string): string | null {
-  return url.startsWith("https://") ? url : null;
+  return /^https?:\/\//.test(url) ? url : null;
 }
 
 function beacon(path: string): void {

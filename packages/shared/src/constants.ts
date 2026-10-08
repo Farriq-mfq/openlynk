@@ -27,6 +27,10 @@ export const PASSWORD_MAX_LENGTH = 128;
 
 export const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
 
+// Absolute http(s) URLs only (uploaded media, external images).
+// Scheme allowlist blocks javascript:/data: XSS vectors.
+export const HTTP_URL_PATTERN = /^https?:\/\//;
+
 export const DEVICE_TYPES = ["mobile", "desktop", "tablet", "other"] as const;
 
 export const BUTTON_STYLES = ["rounded", "pill", "square", "outline"] as const;
