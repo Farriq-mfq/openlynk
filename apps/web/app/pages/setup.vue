@@ -9,7 +9,7 @@ import {
 
 definePageMeta({ layout: false });
 
-useSeoMeta({ title: "Create the admin account" });
+useSeoMeta({ title: "Setup your account" });
 
 const toast = useToast();
 const { register } = useAuth();
@@ -50,7 +50,7 @@ async function onSubmit(): Promise<void> {
   try {
     const res = await register(state);
     if (res.ok) {
-      toast.add({ title: "Admin created", description: "Welcome to OpenLynk", color: "success" });
+      toast.add({ title: "Account created", description: "Welcome to OpenLynk", color: "success" });
       await navigateTo("/dashboard");
     } else {
       toast.add({ title: "Sign up failed", description: res.message, color: "error" });
@@ -66,24 +66,29 @@ async function onSubmit(): Promise<void> {
     <UCard class="w-full max-w-md">
       <template #header>
         <div class="flex flex-col items-center gap-2 py-2">
-          <span class="size-10 rounded-xl bg-primary flex items-center justify-center text-lg font-bold text-white">O</span>
-          <h1 class="text-lg font-semibold">Create the admin account</h1>
-          <p class="text-sm text-muted">First setup only — afterwards registration is closed</p>
+          <span
+            class="size-10 rounded-xl bg-primary flex items-center justify-center text-lg font-bold text-white">O</span>
+          <h1 class="text-lg font-semibold">Set up your account</h1>
+          <p class="text-sm text-muted">First setup only</p>
         </div>
       </template>
 
       <UForm :state="state" :validate="validate" class="flex flex-col gap-4" @submit="onSubmit">
         <UFormField label="Email" name="email" required>
-          <UInput v-model="state.email" type="email" placeholder="you@example.com" icon="i-lucide-mail" class="w-full" autocomplete="email" />
+          <UInput v-model="state.email" type="email" placeholder="you@example.com" icon="i-lucide-mail" class="w-full"
+            autocomplete="email" />
         </UFormField>
         <UFormField label="Password" name="password" required :hint="`${PASSWORD_MIN_LENGTH}+ characters`">
-          <UInput v-model="state.password" type="password" placeholder="••••••••" icon="i-lucide-lock" class="w-full" autocomplete="new-password" />
+          <UInput v-model="state.password" type="password" placeholder="••••••••" icon="i-lucide-lock" class="w-full"
+            autocomplete="new-password" />
         </UFormField>
         <UFormField label="Username" name="username" required hint="Your public URL">
-          <UInput v-model="state.username" placeholder="yourname" icon="i-lucide-at-sign" class="w-full" autocomplete="username" />
+          <UInput v-model="state.username" placeholder="yourname" icon="i-lucide-at-sign" class="w-full"
+            autocomplete="username" />
         </UFormField>
         <UFormField label="Display name" name="display_name" required>
-          <UInput v-model="state.display_name" type="text" placeholder="Your Name" icon="i-lucide-user" class="w-full" />
+          <UInput v-model="state.display_name" type="text" placeholder="Your Name" icon="i-lucide-user"
+            class="w-full" />
         </UFormField>
         <UButton type="submit" :loading="loading" block>Create account</UButton>
       </UForm>
