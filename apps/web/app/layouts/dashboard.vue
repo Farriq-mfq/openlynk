@@ -14,10 +14,13 @@ const publicPath = computed(() => (profile.value ? `/${profile.value.username}` 
 <template>
   <div class="min-h-screen lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
     <aside class="hidden lg:flex flex-col gap-4 border-r border-default p-4 sticky top-0 h-screen overflow-y-auto">
-      <NuxtLink to="/dashboard" class="flex items-center gap-2 px-2 py-1">
-        <span class="size-8 rounded-lg bg-primary flex items-center justify-center text-sm font-bold text-white">O</span>
-        <span class="font-semibold">OpenLynk</span>
-      </NuxtLink>
+      <div class="flex items-center justify-between px-2 py-1">
+        <NuxtLink to="/dashboard" class="flex items-center gap-2">
+          <span class="size-8 rounded-lg bg-primary flex items-center justify-center text-sm font-bold text-white">O</span>
+          <span class="font-semibold">OpenLynk</span>
+        </NuxtLink>
+        <UColorModeButton size="sm" variant="ghost" color="neutral" />
+      </div>
 
       <UNavigationMenu :items="navItems" orientation="vertical" class="flex-1" />
 
@@ -42,7 +45,6 @@ const publicPath = computed(() => (profile.value ? `/${profile.value.username}` 
         >
           Sign out{{ admin ? ` (${admin.email})` : "" }}
         </UButton>
-        <UColorModeButton class="self-start" />
       </div>
     </aside>
 
