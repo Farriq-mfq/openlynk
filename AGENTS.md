@@ -39,7 +39,8 @@ Adding deps: `bun add --filter` fails on this Bun version (404s on workspace nam
 - API CORS uses `credentials: true` with origins split on commas — multiple origins go in one `CORS_ORIGIN` var.
 - Web dev proxies `/api-proxy` → `NUXT_PUBLIC_API_BASE`; browser fetches use `runtimeConfig.public.apiBase`.
 - TS is `strict`, `moduleResolution: Bundler`, `noEmit`; API tsconfig sets `types: ["bun"]`, `lib: ["ESNext"]`.
-- No CI, no `opencode.json`, no Dockerfiles/`docker-compose.yml` yet. Don't create Phase 5 infra or Drizzle migrations unprompted.
+- Phase 5 infra exists: `compose.yml` + `apps/api/Dockerfile` + `apps/web/Dockerfile` + root `.env.example`. Uploads persist in the `uploads` volume; api entrypoint runs `db:migrate` on boot.
+- No CI, no `opencode.json` yet.
 
 ## Working protocol
 
