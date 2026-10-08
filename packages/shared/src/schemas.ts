@@ -37,6 +37,15 @@ export const HttpsUrlSchema = Type.String({
   description: "https:// only — rejects javascript:, data:, http:",
 });
 
+// Uploaded media lives on the API origin, which is plain http:// in local
+// dev. Same XSS guarantees as HttpsUrlSchema (scheme allowlist only).
+export const HttpUrlSchema = Type.String({
+  format: "uri",
+  pattern: "^https?://",
+  maxLength: URL_MAX_LENGTH,
+  description: "http(s):// only — rejects javascript:, data:, and relative URLs",
+});
+
 export const RegisterSchema = Type.Object({
   email: EmailSchema,
   password: PasswordSchema,
@@ -55,7 +64,7 @@ export const UpdateProfileSchema = Type.Object({
   username: Type.Optional(UsernameSchema),
   display_name: Type.Optional(Type.String({ minLength: 1, maxLength: DISPLAY_NAME_MAX_LENGTH })),
   bio: Type.Optional(Type.Union([Type.String({ maxLength: BIO_MAX_LENGTH }), Type.Null()])),
-  avatar_url: Type.Optional(Type.Union([HttpsUrlSchema, Type.Null()])),
+  avatar_url: Type.Optional(Type.Union([HttpUrlSchema, Type.Null()])),
   is_published: Type.Optional(Type.Boolean()),
 });
 export type UpdateProfileInput = Static<typeof UpdateProfileSchema>;
