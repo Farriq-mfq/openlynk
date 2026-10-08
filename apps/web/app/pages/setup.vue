@@ -87,13 +87,6 @@ async function onSubmit(): Promise<void> {
         </UFormField>
         <UButton type="submit" :loading="loading" block>Create account</UButton>
       </UForm>
-
-      <template #footer>
-        <p class="text-sm text-center text-muted">
-          Already set up?
-          <NuxtLink to="/login" class="text-primary font-medium">Sign in</NuxtLink>
-        </p>
-      </template>
     </UCard>
   </div>
 </template>
