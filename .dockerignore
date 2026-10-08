@@ -1,0 +1,16 @@
+node_modules/
+bun.lockb
+.output/
+.nuxt/
+dist/
+.turbo/
+.cache/
+*.log
+.git/
+.gitignore
+.env
+.env.*
+!.env.example
+apps/api/uploads/
+Dockerfile
+.dockerignore
