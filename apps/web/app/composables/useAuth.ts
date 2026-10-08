@@ -19,7 +19,22 @@ interface MeResponse {
 export function useAuth() {
   const admin = useState<Admin | null>("auth:admin", () => null);
   const profile = useState<Profile | null>("auth:profile", () => null);
+  const setupRequired = useState<boolean | null>("auth:setup-required", () => null);
   const api = useApi();
+
+  // Whether the installation still needs its first admin. Cached after the
+  // first check; cleared to false on successful login/register below.
+  async function fetchSetupStatus(): Promise<boolean> {
+    if (setupRequired.value !== null) return setupRequired.value;
+    try {
+      const res = await api<{ setupRequired: boolean }>("/auth/setup-status");
+      setupRequired.value = res.setupRequired;
+      return res.setupRequired;
+    } catch {
+      // API unreachable: fail open so pages surface their own errors.
+      return false;
+    }
+  }
 
   async function fetchMe(): Promise<boolean> {
     try {
@@ -42,6 +57,7 @@ export function useAuth() {
       });
       admin.value = me.admin;
       profile.value = me.profile;
+      setupRequired.value = false;
       return { ok: true };
     } catch (err) {
       return { ok: false, message: apiMessage(err, "Login failed") };
@@ -61,6 +77,7 @@ export function useAuth() {
       });
       admin.value = res.admin;
       profile.value = res.profile;
+      setupRequired.value = false;
       return { ok: true };
     } catch (err) {
       return { ok: false, message: apiMessage(err, "Registration failed") };
@@ -78,5 +95,5 @@ export function useAuth() {
     await navigateTo("/login");
   }
 
-  return { admin, profile, fetchMe, login, register, logout };
+  return { admin, profile, fetchMe, fetchSetupStatus, login, register, logout };
 }

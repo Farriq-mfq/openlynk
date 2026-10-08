@@ -171,6 +171,15 @@ export const authModule = new Elysia({ prefix: "/auth" })
     cookie[REFRESH_COOKIE]?.set({ value: refresh, ...refreshCookieOpts() });
     return { ok: true };
   })
+  .get("/setup-status", async ({ request, status }) => {
+    if (throttle(request, "setup-status")) {
+      return status(429, apiError("RATE_LIMITED", "Too many attempts, try again later"));
+    }
+    // Public by necessity: the web setup flow needs to know whether the
+    // first-admin registration is still open. Reveals nothing but that bit.
+    const [row] = await db.select({ id: admins.id }).from(admins).limit(1);
+    return { setupRequired: !row };
+  })
   .derive(async ({ cookie }) => ({ adminId: await resolveAdminId(cookie) }))
   .onBeforeHandle(({ adminId, status }) => {
     if (!adminId) return status(401, apiError("UNAUTHORIZED", "Authentication required"));
