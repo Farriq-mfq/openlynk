@@ -5,7 +5,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (to.path.startsWith("/dashboard") && !admin.value) {
     return navigateTo("/login");
   }
-  if (to.path === "/login" && admin.value) {
-    return navigateTo("/dashboard");
+  if (to.path === "/login" || to.path === "/register") {
+    if (admin.value) return navigateTo("/dashboard");
   }
 });

@@ -6,6 +6,11 @@ export interface LoginInput {
   password: string;
 }
 
+export interface RegisterInput extends LoginInput {
+  username: string;
+  display_name: string;
+}
+
 interface MeResponse {
   admin: Admin;
   profile: Profile;
@@ -43,6 +48,25 @@ export function useAuth() {
     }
   }
 
+  async function register(input: RegisterInput): Promise<{ ok: boolean; message?: string }> {
+    try {
+      const res = await api<MeResponse>("/auth/register", {
+        method: "POST",
+        body: {
+          email: input.email.trim(),
+          password: input.password,
+          username: input.username.trim(),
+          display_name: input.display_name.trim(),
+        },
+      });
+      admin.value = res.admin;
+      profile.value = res.profile;
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, message: apiMessage(err, "Registration failed") };
+    }
+  }
+
   async function logout(): Promise<void> {
     try {
       await api("/auth/logout", { method: "POST" });
@@ -54,5 +78,5 @@ export function useAuth() {
     await navigateTo("/login");
   }
 
-  return { admin, profile, fetchMe, login, logout };
+  return { admin, profile, fetchMe, login, register, logout };
 }
