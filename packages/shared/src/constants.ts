@@ -5,6 +5,7 @@ export const USERNAME_PATTERN = /^[a-z0-9_]{3,30}$/;
 export const RESERVED_USERNAMES = [
   "login",
   "register",
+  "setup",
   "dashboard",
   "api",
   "admin",

@@ -62,8 +62,8 @@ async function onSubmit(): Promise<void> {
 
       <template #footer>
         <p class="text-sm text-center text-muted">
-          First setup?
-          <NuxtLink to="/register" class="text-primary font-medium">Create the admin account</NuxtLink>
+          First time here?
+          <NuxtLink to="/setup" class="text-primary font-medium">Set up your account</NuxtLink>
         </p>
       </template>
     </UCard>
