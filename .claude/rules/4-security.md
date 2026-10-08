@@ -10,17 +10,18 @@ Violations MUST be rejected. No exceptions without explicit user sign-off.
 ## 4.2 JWT via Secure HttpOnly Cookies (Nuxt 3 Compatible)
 - Tokens MUST travel ONLY in `HttpOnly; Secure (in prod); SameSite=Lax; Path=/` cookies: `access_token` (15 min, `{sub}`), `refresh_token` (7d, `{sub, jti}` + row in `refresh_tokens`).
 - FORBIDDEN: tokens in response bodies, URLs, or `localStorage`/`sessionStorage`.
-- Login/register/refresh MUST use `Set-Cookie`. Logout MUST delete DB row + clear both cookies with `Max-Age=0`.
+- Login/refresh MUST use `Set-Cookie`. Logout MUST delete DB row + clear both cookies with `Max-Age=0`.
+- There is NO public registration endpoint and NO register page. The single admin is created by `bun run db:seed` from `ADMIN_NAME`/`ADMIN_EMAIL`/`ADMIN_PASSWORD`/`ADMIN_USERNAME` (which also ensures a minimal public profile, since login requires one). The seeder MUST be idempotent (never duplicate or overwrite), MUST hash with `Bun.password.hash`, and MUST NEVER log or return the plaintext password. Example values in `.env.example` MUST be changed in production.
 - Refresh MUST rotate: verify cookie -> check `token_hash` -> delete old row -> issue new pair. Reuse of revoked `jti` MUST 401.
 - Nuxt SSR MUST forward `cookie` header (`useRequestHeaders(['cookie'])`) to API and use `credentials: 'include'` client-side. CORS MUST be allowlist-only (`CORS_ORIGIN`), never `*`.
 - Mutations REQUIRE `Origin`/`Referer` allowlist check as CSRF defense alongside `SameSite=Lax`.
 
-## 4.3 Multi-Tenant Authorization (MANDATORY ON EVERY MUTATION)
-- Auth middleware MUST resolve `userId` from verified `access_token` before any `/links` or `/profile` handler.
-- NEVER trust `user_id` or `profile_id` from client body/query. Derive ownership server-side: `profiles.user_id = auth.userId`.
+## 4.3 Single-Admin Authorization (MANDATORY ON EVERY MUTATION)
+- Auth middleware MUST resolve `adminId` from verified `access_token` before any `/links`, `/profile`, or `/analytics` handler. A `disabled` admin status MUST reject with 403 even with a valid JWT (checked at login, refresh, and `/me`).
+- NEVER trust `admin_id` or `profile_id` from client body/query. Derive ownership server-side: `profiles.admin_id = auth.adminId`. There is exactly one admin; no roles, teams, or tenant scoping.
 - Pattern for `POST/PUT/DELETE /links` and `PUT /profile/*`:
-  1. `SELECT profiles WHERE user_id = auth.userId` (404 if none).
-  2. For `:id` routes: `SELECT links JOIN profiles WHERE links.id = :id AND profiles.user_id = auth.userId` (403/404 on mismatch — prefer 404 to avoid ID oracle).
+  1. `SELECT profiles WHERE admin_id = auth.adminId` (404 if none).
+  2. For `:id` routes: `SELECT links JOIN profiles WHERE links.id = :id AND profiles.admin_id = auth.adminId` (404 on mismatch — prefer 404 to avoid ID oracle).
   3. Execute mutation scoped to resolved `profile_id`.
 - Public endpoints (`GET /public/:username`) are read-only and MUST expose only `is_published = true` + `is_active = true` links. No email/hash leakage.
 

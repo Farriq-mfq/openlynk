@@ -168,3 +168,29 @@ Non-negotiable for every module above.
 - Files: PostgreSQL stores storage keys + metadata, NEVER file bytes. One storage abstraction in `apps/api` (`local` driver now; S3-compatible later) used by product files/images, lesson content, and avatars. Signed/confirmed delivery is a future capability the schema must already allow (`storage_key`, `byte_size`, `mime`).
 - Page Builder: reference-only integration for all blocks (`product`, `course`, `event`, `appointment`, `donation`, `reviews`, `*_collection`, `featured_*`). Blocks carry entity IDs + presentation options; content resolves via public APIs at render time. Duplicating domain fields into block payloads is a schema-review failure.
 - Analytics: new domains emit events through the existing analytics module; allowed event names: `product_view, add_to_cart, checkout_started, purchase, course_view, course_enrollment, event_view, event_registration, appointment_view, appointment_booking, donation_created, subscription_started, subscription_cancelled`. No extra PII in event payloads beyond what `modules/analytics` already accepts.
+
+## 2.15 Single-Admin / Single-Owner Model (SUPERSEDES multi-user assumptions)
+
+OpenLynk is NOT a public SaaS. It is a self-hosted single-owner installation: one administrator owns the entire instance. This section OVERRIDES any multi-user/multi-tenant reading of §§2.4–2.14.
+
+```
+Single Admin
+  └── Profile (single public identity)
+        ├── Links / Page blocks / Appearance
+        ├── Products → Orders (customers are EXTERNAL buyers, never admins)
+        ├── Courses → Students (external enrollees)
+        ├── Events → Attendees (external)
+        ├── Appointments → Bookings (external)
+        ├── Donations (external donors, no accounts)
+        ├── Reviews (external authors, admin-moderated)
+        ├── Subscriptions (customer memberships; platform SaaS plans NOT required)
+        ├── Analytics
+        └── Custom Domains (domain → installation, never domain → user)
+```
+
+- Identity: `admins` table (`email unique`, `password_hash`, `name`, `status: active | disabled`). No `users` table, no public registration endpoint or page, no roles/teams/organizations. The sole admin is created by `bun run db:seed` from `ADMIN_NAME`/`ADMIN_EMAIL`/`ADMIN_PASSWORD`.
+- Auth surface: `POST /api/v1/auth/login`, `POST /api/v1/auth/logout` (+ refresh), `GET /api/v1/auth/me`. Dashboard (`/dashboard/*`, guarded by `auth.global.ts`) requires an `active` admin JWT; `/login` stays public. A `disabled` status rejects at login, refresh, and `/me`.
+- Tenancy: every protected read/write resolves through `profiles.admin_id = auth.adminId` (helpers `getAdminProfile`/`getOwnedLink`). Do NOT add `userId`/`ownerId`/`tenantId`/`organizationId`/`workspaceId` to new tables — relate new entities to the profile chain (or keep them installation-global where ownership is meaningless, e.g. donation settings). New modules MUST NOT reintroduce per-user scoping.
+- Customers/students/attendees/donors are external records (email + minimal PII), never admin accounts, and never gain dashboard access.
+- SaaS billing (Phase 13 platform track: Free/Pro/Business) is deferred and NOT required for the self-hosted installation. Customer-facing subscriptions/memberships may proceed without it.
+- Public URL stays `/:username` for compatibility (single profile), served from `/`; the installation itself is the one creator/business.
