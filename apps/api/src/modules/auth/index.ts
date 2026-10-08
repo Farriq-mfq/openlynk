@@ -1,9 +1,9 @@
 import { Elysia } from "elysia";
-import { eq } from "drizzle-orm";
-import { LoginSchema } from "@openlynk/shared";
+import { eq, sql } from "drizzle-orm";
+import { LoginSchema, RegisterSchema, RESERVED_USERNAMES } from "@openlynk/shared";
 import { db } from "../../db";
 import { admins, profiles, refreshTokens } from "../../db/schema";
-import { verifyPassword } from "../../lib/password";
+import { hashPassword, verifyPassword } from "../../lib/password";
 import {
   ACCESS_COOKIE,
   REFRESH_COOKIE,
@@ -37,9 +37,64 @@ async function issuePair(adminId: string) {
   return { access, refresh };
 }
 
+function isUniqueViolation(err: unknown): boolean {
+  return typeof err === "object" && err !== null && "code" in err && err.code === "23505";
+}
+
 export const authModule = new Elysia({ prefix: "/auth" })
-  // NOTE: single-admin installation — there is intentionally NO /register
-  // endpoint. The admin account is created via `bun run db:seed`.
+  // Single-admin bootstrap: this endpoint is open ONLY until the first admin
+  // exists. The first registration becomes the installation owner (admin +
+  // profile created together); every later call gets 403. There is no other
+  // account creation path.
+  .post(
+    "/register",
+    async ({ body, cookie, status, request, set }) => {
+      if (throttle(request, "register")) {
+        return status(429, apiError("RATE_LIMITED", "Too many attempts, try again later"));
+      }
+      const email = body.email.trim().toLowerCase();
+      const username = body.username.trim().toLowerCase();
+      const display_name = body.display_name.trim();
+      if ((RESERVED_USERNAMES as readonly string[]).includes(username)) {
+        return status(400, apiError("USERNAME_RESERVED", "This username is reserved"));
+      }
+      let created: { admin: typeof admins.$inferSelect; profile: typeof profiles.$inferSelect } | null;
+      try {
+        created = await db.transaction(async (tx) => {
+          // Serialize concurrent bootstraps: only one transaction can win.
+          await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext('openlynk_admin_bootstrap'))`);
+          const [taken] = await tx.select({ id: admins.id }).from(admins).limit(1);
+          if (taken) return null;
+          const password_hash = await hashPassword(body.password);
+          const [admin] = await tx
+            .insert(admins)
+            .values({ email, password_hash, name: display_name, status: "active" })
+            .returning();
+          const [profile] = await tx
+            .insert(profiles)
+            .values({ admin_id: admin!.id, username, display_name })
+            .returning();
+          return { admin: admin!, profile: profile! };
+        });
+      } catch (err) {
+        // Race safety net: concurrent winners collide on unique constraints.
+        if (isUniqueViolation(err)) {
+          return status(409, apiError("CONFLICT", "Registration is closed"));
+        }
+        throw err;
+      }
+      if (!created) {
+        return status(403, apiError("REGISTRATION_CLOSED", "Registration is closed"));
+      }
+      const { access, refresh } = await issuePair(created.admin.id);
+      cookie[ACCESS_COOKIE]?.set({ value: access, ...accessCookieOpts() });
+      cookie[REFRESH_COOKIE]?.set({ value: refresh, ...refreshCookieOpts() });
+      set.status = 201;
+      const { password_hash: _omitted, ...safeAdmin } = created.admin;
+      return { admin: safeAdmin, profile: created.profile };
+    },
+    { body: RegisterSchema },
+  )
   .post(
     "/login",
     async ({ body, cookie, status, request }) => {

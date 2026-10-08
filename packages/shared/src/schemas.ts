@@ -37,6 +37,14 @@ export const HttpsUrlSchema = Type.String({
   description: "https:// only — rejects javascript:, data:, http:",
 });
 
+export const RegisterSchema = Type.Object({
+  email: EmailSchema,
+  password: PasswordSchema,
+  username: UsernameSchema,
+  display_name: Type.String({ minLength: 1, maxLength: DISPLAY_NAME_MAX_LENGTH }),
+});
+export type RegisterInput = Static<typeof RegisterSchema>;
+
 export const LoginSchema = Type.Object({
   email: EmailSchema,
   password: Type.String({ minLength: 1, maxLength: PASSWORD_MAX_LENGTH }),

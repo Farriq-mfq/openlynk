@@ -14,7 +14,7 @@ import { relations, sql } from "drizzle-orm";
 import type { ThemeConfig } from "@openlynk/shared";
 
 // admins — single-owner auth identity. One row per installation, created by
-// the db seeder (bun run db:seed). No public registration. No profile fields here.
+// the first POST /api/v1/auth/register (bootstrap). No profile fields here.
 export const admins = pgTable("admins", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: varchar("email", { length: 255 }).notNull().unique(),
