@@ -8,6 +8,13 @@
       "when": 1791441458438,
       "tag": "0000_complete_franklin_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791446626415,
+      "tag": "0001_single-admin-model",
+      "breakpoints": true
     }
   ]
 }
