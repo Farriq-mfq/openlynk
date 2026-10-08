@@ -8,7 +8,7 @@ if [ -z "$JWT_SECRET" ]; then
 fi
 
 echo "Applying database migrations..."
-bun run db:migrate
+bun src/db/migrate.ts
 
 echo "Starting api..."
 exec bun dist/index.js
