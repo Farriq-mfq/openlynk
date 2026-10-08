@@ -30,5 +30,11 @@ Violations MUST be rejected. No exceptions without explicit user sign-off.
 ## 4.4 Input Validation — Block XSS & SQL Injection
 - EVERY API input (body, params, query) MUST have a TypeBox schema in Elysia (`t.Object(...)`) imported from or mirrored in `packages/shared`. No unvalidated handlers.
 - SQL injection: Drizzle query builder ONLY. No string-concatenated SQL. Any `sql``` usage MUST use parameterized bindings and requires justification.
-- XSS: trim all strings; strip HTML tags from `title/bio/display_name`; validate `url` as `https://` URI (reject `javascript:`, `data:`); set `avatar_url` to https URI or null; API returns JSON only (no HTML interpolation). Public page MUST escape all user content (Vue default; never `v-html` on user data).
+- XSS: trim all strings; strip HTML tags from `title/bio/display_name`; validate `url` as `https://` URI (reject `javascript:`, `data:`); set `avatar_url` to an `http(s)` URI or null (uploaded media may be plain-http in local dev); API returns JSON only (no HTML interpolation). Public page MUST escape all user content (Vue default; never `v-html` on user data).
 - Auth endpoints MUST rate-limit (e.g. 10 req/min/IP) and return generic `401 Invalid credentials` (no user-enumeration). Error payloads MUST NOT leak stack traces in production.
+
+## 4.5 File Uploads — Images Only, Never Trust the Client
+- `POST /api/v1/uploads/image` requires admin JWT + rate limit. Accept images ONLY (`png/jpeg/webp/gif`, ≤2 MB). FORBIDDEN: SVG (inline `<script>` XSS), any executable/archive type, client-supplied filenames (use `crypto.randomUUID()` + validated extension).
+- Serve via `GET /api/v1/uploads/:name` with a strict filename regex (uuid + image ext); anything else 404s. No path traversal possible. `Cache-Control: immutable` is safe (filenames never reused).
+- Stored URLs are absolute from `API_PUBLIC_URL` (never the request Origin — the api and web run on different origins). `API_PUBLIC_URL` MUST match the browser-reachable api address in production. The `uploads/` dir is runtime data (gitignored) and needs a persistent volume in Docker.
+- Avatar/background URLs elsewhere MUST match `^https?://` (shared `HTTP_URL_PATTERN` / `HttpUrlSchema`); `javascript:`/`data:` are rejected at the API boundary and by the public page's `safeUrl`.
