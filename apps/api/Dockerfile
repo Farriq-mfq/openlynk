@@ -18,7 +18,11 @@ WORKDIR /app/apps/api
 ENV NODE_ENV=production
 
 # Workspace layout must mirror the builder (bun symlinks are absolute paths).
+# NOTE: each workspace keeps its own node_modules (bun nests real deps +
+# links there) — copy them all or runtime resolution breaks.
 COPY --from=build /app/node_modules /app/node_modules
+COPY --from=build /app/apps/api/node_modules /app/apps/api/node_modules
+COPY --from=build /app/packages/shared/node_modules /app/packages/shared/node_modules
 COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/apps/api/package.json /app/apps/api/package.json
 COPY --from=build /app/apps/api/dist /app/apps/api/dist
